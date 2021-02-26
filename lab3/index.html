@@ -38,8 +38,8 @@
     
       function onEachFeature(feature, layer) {
     // does this feature have a property named popupContent?
-      if (feature.properties) {
-          layer.bindPopup(feature.properties);
+      if (feature.properties && feature.properties.Route) {
+          layer.bindPopup(feature.properties.Route);
         }}
     
       var bus = new L.geoJson(bus, {

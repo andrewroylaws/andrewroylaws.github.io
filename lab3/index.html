@@ -38,7 +38,7 @@
     
       function onEachFeature(feature, layer) {
       if (feature.features.properties && feature.features.properties.Route) {
-          layer.bindPopup('<p>Route Number: '+feature.features.properties.Route+'</p>)
+          layer.bindPopup('<p>Route Number: '+feature.features.properties.Route+'</p>')
         }};
 //     '<h1>'+feature.features.properties.Route+'</h1><p>Language: '+feature.properties.language+'</p>'
       var bus = new L.geoJson(bus, {

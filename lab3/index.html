@@ -39,7 +39,8 @@
       function onEachFeature(feature, layer) {
       if (feature.features.properties && feature.features.properties.Route) {
           layer.bindPopup(feature.features.properties.Route);
-        }}
+        }
+      }
 
       var bus = new L.geoJson(bus, {
         onEachFeature: onEachFeature

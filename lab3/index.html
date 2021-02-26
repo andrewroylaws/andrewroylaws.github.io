@@ -41,7 +41,8 @@
           layer.bindPopup(feature.features.properties.Route);
         }}
     
-      var bus = new L.geoJson(bus).addTo(map);    
+      var bus = new L.geoJson(bus, {
+        onEachFeature: onEachFeature}).addTo(map);    
   </script>
 </body>
 </html>

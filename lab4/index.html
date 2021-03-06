@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>Lab 4 | Andrew Laws</title>
+  <style> html, body, #viewDiv {padding: 0; margin: 0; height: 100%; width: 100%;} </style>
+
+ <link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/themes/light/main.css"/>
+ <script src="https://js.arcgis.com/4.14/"></script>
+
+    <script>
+      require([
+		"esri/Map", 
+		"esri/layers/TileLayer",
+		"esri/layers/GeoJSONLayer",
+		"esri/views/MapView",
+		"esri/layers/FeatureLayer",
+		"esri/widgets/Legend"
+		], function(Map, TileLayer, GeoJSONLayer, MapView, FeatureLayer, Legend) {
+
+		var thebasemap = new TileLayer({
+			url:"https://gisext.lincoln.ne.gov/arcgis/rest/services/GIS/LancoBasemap/MapServer/"
+		});
+		const url = "https://opendata.arcgis.com/datasets/5aa5f17d117f409d8608ec1bf6de06d6_0.geojson";
+
+		const renderer = {
+			type: "simple",
+			field: "CNTASSDVAL",
+			legendOptions: {title: "Assessed values in Lincoln"},
+			symbol: {
+				type: "simple-marker",
+				color: "red",
+				outline: {
+					color: "gray"
+					}
+			},
+			visualVariables: [
+			  {
+				type: "size",
+				field: "CNTASSDVAL",
+				stops: [
+					<!-- { -->
+						<!-- value: 25000, -->
+						<!-- size: "5px", -->
+						<!-- label: "Under $25,000" -->
+					<!-- }, -->
+					{
+						value: 100000,
+						size: "7px",
+						label: "Low"
+					},
+					{
+						value: 500000,
+						size: "17px",
+						label: "Medium"
+					},
+					{
+						value: 1000000,
+						size: "27px",
+						label: "High"
+					}
+					]
+				}
+			]
+		};
+		
+		const geojsonLayer = new GeoJSONLayer({
+			url: url,
+			copyright: "Andrew Laws Lab 4",
+			renderer: renderer
+		});
+		var map = new Map({
+          layers: [thebasemap, geojsonLayer]
+        });
+		
+        var view = new MapView({
+          container: "viewDiv",
+          map: map,
+          zoom: 10,
+          center: [-96.6745358295191, 40.825439621706366]
+        });
+
+		const featureLayer = new FeatureLayer({
+		url: "https://gisext.lincoln.ne.gov/arcgis/rest/services/Parks/Park_Boundaries/MapServer/0"
+		});
+		
+		const legend = new Legend({
+			view: view,
+			layerInfos: [{
+			layer: geojsonLayer,
+			title: "Lab 4 Symbols"
+			}]
+			});
+		
+		map.add(featureLayer);
+		view.ui.add(legend, "bottom-left");
+		});
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>             

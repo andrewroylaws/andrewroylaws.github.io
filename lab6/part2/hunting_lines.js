@@ -1,4 +1,4 @@
-{
+var huntinglines = {
 "type": "FeatureCollection",
 "name": "nearest_hunting_area",
 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },

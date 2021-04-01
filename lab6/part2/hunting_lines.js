@@ -315,4 +315,4 @@ var huntinglines = {
 { "type": "Feature", "properties": { "OBJECTID": 310, "rWaterbody": null, "rAreaName": "Island Lake #3", "HubName": "Crescent Lake WMA" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -102.392023912210817, 41.738537959449218 ], [ -102.403198214133468, 41.711260120817052 ] ] ] } },
 { "type": "Feature", "properties": { "OBJECTID": 311, "rWaterbody": null, "rAreaName": "Prairie Queen", "HubName": "Two Rivers WMA" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ -96.115183565378928, 41.162351324235161 ], [ -96.346971071916457, 41.208809703033431 ] ] ] } }
 ]
-}
+};

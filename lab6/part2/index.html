@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>D3 World Map</title>
+    <script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
+
+  <!--add in github data -->
+    <script src="https://andrewroylaws.github.io/lab6/part2/hunting_areas.js"></script>
+    <script src="https://andrewroylaws.github.io/lab6/part2/hunting_lines.js"></script>
+    <script src="https://andrewroylaws.github.io/lab6/part2/boat_ramps.js"></script>
+
+  </head>
+  <body>
+    <h1>Public boat lauches and the nearest state park</h1>
+    <p>Hold your pointer over a state park or boat launch to get more info.<br>The lines connect a boat launch to the nearest park.</p>
+    <h2></h2>
+    <h3></h3>
+    <h4></h4>
+    <script>
+      var width = 1200;
+      var height = 900;
+      var lowColor = '#feb24c'
+      var highColor = '#f03b20'
+      var minVal = 0
+      var maxVal = 18
+
+      // create color ramp
+      var ramp = d3.scaleLinear().domain([minVal, maxVal]).range([lowColor, highColor])
+
+      var svg = d3.select("body")
+          .append("svg")
+          .attr("width", width)
+          .attr("height", height);
+
+      var g = svg.append("g");
+
+      var projection = d3.geoAlbers()
+        .scale(50000)
+        .rotate([96.33118625, 0])
+        .center([0, 41.041295261])
+        .translate([width/2, height/2]);
+
+      var geoPath = d3.geoPath()
+          .projection(projection);
+
+      g.selectAll("path")
+        .data(huntingareas.features)
+        .enter()
+        .append("path")
+        .attr( "fill", function(d) { return ramp(d.properties.Counts) })
+        .attr("stroke", "#1C00ff00")
+        .attr("d", geoPath)
+        .attr("class", "stparkdata")
+        .on("mouseover", function(d){
+          d3.select("").text("This area is named " + d.properties.HuntingA_2 + " and it is the nearest state park to " + d.properties.Counts + " public boat launches.");
+          d3.select(this).attr("class", "stparkdata hover");
+        })
+        .on("mouseout", function(d){
+
+          d3.select("h2").text("");
+          d3.select(this).attr("class", "stparkdata");
+        });
+
+      var h_lines = svg.append('g');
+
+      h_lines.selectAll('path')
+        .data(huntinglines.features)
+        .enter()
+        .append('path')
+        .attr("fill", "#900")
+        .attr("stroke", "#999")
+        .attr("d", geoPath);
+
+      var boatramp = svg.append('g');
+
+      boatramp.selectAll('path')
+        .data(boatramps.features)
+        .enter()
+        .append('path')
+        .attr("fill", "#f4fc03")
+        .attr("stroke", "#dad2cb")
+        .attr("d", geoPath)
+        .attr("class", "linedata")
+        .on("mouseover", function(d){
+          d3.select("h2").text("This boat launch is " + d.properties.HubDist.toFixed(2) + " miles away from " + d.properties.HubName);
+          d3.select(this).attr("class", "linedata hover");
+        })
+        .on("mouseout", function(d){
+
+          d3.select("h2").text("");
+          d3.select(this).attr("class", "linedata");
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Andrew Laws Lab 7 Part 2.1</title>
+
+	<link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js" integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA==" crossorigin=""></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+
+	<style>
+		html, body { margin: 0; padding: 0; height: 100%; }
+		#map { min-height: 100%; }
+	</style>
+</head>
+<body>
+	<div id="map"></div>
+
+	<script>
+		var map = L.map('map', {
+			center: [38.1625228, -96.9633171],
+			zoom: 4
+		});
+
+		L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}', {
+			attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+			subdomains: 'abcd',
+			minZoom: 0,
+			maxZoom: 20,
+			ext: 'png'
+		}).addTo(map);
+
+		$.getJSON("https://andrewroylaws.github.io/lab7/part2/city.geojson")
+				.done(function (data) {
+					var info = processData(data);
+					createPropSymbols(info.timestamps, data);
+					createSliderUI(info.timestamps);
+				});
+
+		function processData(data) {
+			var timestamps = [];
+			var min = Infinity;
+			var max = -Infinity;
+
+			for (var feature in data.features) {
+				var properties = data.features[feature].properties;
+
+				for (var attribute in properties) {
+					if ( attribute != 'id' &&
+						attribute != 'name' &&
+						attribute != 'latitude' &&
+						attribute != 'longitude') {
+
+					if ($.inArray(attribute, timestamps) === -1) {
+						timestamps.push(attribute);
+					}
+
+					if (properties[attribute] < min) {
+							min = properties[attribute];
+						}
+					if (properties[attribute] > max) {
+						max = properties[attribute];
+					}
+						}
+					}
+				}
+				return {
+					timestamps : timestamps,
+					min : min,
+					max: max
+				}
+			}
+
+			function createPropSymbols(timestamps, data) {
+				cities = L.geoJson(data, {
+					pointToLayer: function(feature, latlng) {
+						return L.circleMarker(latlng, {
+							fillColor: "#501e65",
+							color: '#501e65',
+							weight: 2,
+							fillOpacity: 0.5
+						}).on({
+							mouseover: function(e) {
+								this.openPopup();
+								this.setStyle({fillColor: 'green'});
+							},
+							mouseout: function(e) {
+								this.closePopup();
+								this.setStyle({fillColor: "#501e65"});
+							}
+						});
+					}
+				}).addTo(map);
+
+				updatePropSymbols(timestamps[0]);
+			}
+
+		function createSliderUI(timestamps) {
+
+			  var sliderControl = L.control({ position: 'bottomleft'} );
+			                    
+			  sliderControl.onAdd = function(map) {
+			      var slider = L.DomUtil.create("input", "range-slider");
+			      L.DomEvent.addListener(slider, 'mousedown', function(e) {
+			          L.DomEvent.stopPropagation(e);
+			      });
+			    
+			    var labels = ["1950", "1960", "1970", "1980", "1990", "2000", "2010", "2020"];
+
+			    $(slider)
+			        .attr({
+			          'type':'range',
+			          'max': timestamps[timestamps.length-1],
+			          'min':timestamps[0],
+			          'step': 10, 
+			          'value': String(timestamps[0])
+			        })
+			        .on('input change', function() {
+			            updatePropSymbols($(this).val().toString()); 
+			            var i = $.inArray(this.value,timestamps);
+			            $(".temporal-legend").text(labels[i]); 
+			        })
+					.mousedown(function () {
+					map.dragging.disable();
+					})
+					
+			    return slider;
+			  }
+			  sliderControl.addTo(map);
+			  createTimeLabel("1950"); 
+			  }
+
+		function createTimeLabel(startTimestamp) {
+		    var temporalLegend = L.control({position: 'bottomleft' }); 
+		                       
+		    temporalLegend.onAdd = function(map) {
+		      var output = L.DomUtil.create("output", "temporal-legend");
+		      $(output).text(startTimestamp);
+		      return output;
+		    }
+		    temporalLegend.addTo(map);
+		  }
+
+		function updatePropSymbols(timestamp) {
+
+              cities.eachLayer(function(layer) {  
+                  var props = layer.feature.properties;   
+                  var radius = calcPropRadius(props[timestamp]); 
+
+
+                 var popupContent = props.name + ' ' + timestamp + ' population: ' + String(props[timestamp]);
+
+                  layer.setRadius(radius);  
+                  layer.bindPopup(popupContent, { offset: new L.Point(0,-radius) }); 
+              });
+            }
+
+
+        function calcPropRadius(attributeValue) {
+
+          var scaleFactor = 0.001;   
+                                     
+          var area = attributeValue * scaleFactor;
+
+          return Math.sqrt(area/Math.PI);  
+            }
+	</script>
+
+</body>
+</html>

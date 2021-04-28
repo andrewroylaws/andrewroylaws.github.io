@@ -122,7 +122,7 @@
     		minZoom: 10,
     		maxZoom: 16,
     		radius: 50,
-		gradient: {0.45: "blue", 0.80: "lime", 1.0: "red"},
+		gradient: {0.45: "blue", 0.80: "lime", 1.0: "red"}
   		});
 
   		var allobs = new L.esri.featureLayer({
@@ -138,7 +138,8 @@
     		where: "STATE = 'MI' AND KINGDOM = '0'",
     		minZoom: 8,
     		maxZoom: 16,
-    		radius: 40
+    		radius: 40,
+		gradient: {0.45: "blue", 0.80: "lime", 1.0: "red"}
   		});
 
 		var plantae = new L.esri.featureLayer({
@@ -154,7 +155,8 @@
     		where: "STATE = 'MI' AND KINGDOM = '1'",
     		minZoom: 8,
     		maxZoom: 16,
-    		radius: 40
+    		radius: 40,
+		gradient: {0.45: "blue", 0.80: "lime", 1.0: "red"}
   		});
 
 		var animalia = new L.esri.featureLayer({
@@ -170,7 +172,8 @@
     		where: "STATE = 'MI' AND Q_NAME LIKE '%knotweed%'",
     		minZoom: 8,
     		maxZoom: 16,
-    		radius: 100
+    		radius: 100,
+		gradient: {0.45: "blue", 0.80: "lime", 1.0: "red"}
   		});
 
 		var knotweed = new L.esri.featureLayer({
@@ -186,7 +189,8 @@
     		where: "STATE = 'MI' AND Q_NAME LIKE '%swallow-wort%'",
     		minZoom: 8,
     		maxZoom: 16,
-    		radius: 100
+    		radius: 100,
+		gradient: {0.45: "blue", 0.80: "lime", 1.0: "red"}
   		});
 
 		var swallowwort = new L.esri.featureLayer({

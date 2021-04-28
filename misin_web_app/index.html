@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+	
+	<title>MISIN Planning Application</title>
+
+	<!-- Load leaflet -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+	   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+	   crossorigin=""/>
+
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+	   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+	   crossorigin=""></script><script src="https://unpkg.com/leaflet.heat@0.2.0"></script>
+
+   	<!-- Load leaflet heat plugin -->
+	<script src="https://unpkg.com/leaflet.heat@0.2.0"></script>
+
+	<!-- Load ESRI leaflet layers -->
+	<script src="https://unpkg.com/esri-leaflet@2.5.3/dist/esri-leaflet.js"
+    integrity="sha512-K0Vddb4QdnVOAuPJBHkgrua+/A9Moyv8AQEWi0xndQ+fqbRfAFd47z4A9u1AW/spLO0gEaiE1z98PK1gl5mC5Q=="
+    crossorigin=""></script>
+
+    <script src="https://unpkg.com/esri-leaflet-heatmap@2.0.0"></script>
+
+	<!-- add L.Control.Zoominfo js and css after Leaflet -->
+	<link rel="stylesheet" href="L.Control.ZoomLabel.css">
+	<script src="L.Control.ZoomLabel.js"></script>
+
+	<!-- Easyprint -->
+	<script src="leaflet_easyprint\leaflet-easyprint\dist\bundle.js"></script>
+
+	<!-- schools data -->
+	<script src="https://andrewroylaws.github.io/misin_web_app/mi_schools.js"></script>
+
+	<meta charset="utf-8">
+
+	<meta charset="utf-8", name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
+   	
+   	<style type="text/css">s
+   		body{
+   			padding: 0;
+   			margin: 0;
+   		}
+
+   		html, body, #map {
+   			height: 93%;
+   		}
+   		.header {
+   			text-align: left;
+   			background: #9fc8c2;
+   			color: black;   		}
+
+		.instructions {
+			text-align: left;
+			background: white;
+			color: black;
+		}
+   	</style>
+
+
+
+</head>
+<body>
+	<div class="header">
+		<h2>MISIN Planning Application</h2>
+    	<p style="font-size:110%;">The purpose of the application is to show invasive species sampling densities, highlight areas of need, and to ecourage CISMAs in Michigan to work with school districts on getting students involved in invasive species mapping. <br> The observation data is courtesy of the Midwest Invasive Species Information Network <a href="https://www.misin.msu.edu/" target="_blank">(MISIN)</a>.</p>
+	</div>
+
+	<div class="instructions">
+		<p style="font-size:110%;">Different basemaps and layers can be selected in the upper right. For the observation layers, zoom levels (indicated in the upper left corner) up to 16 will show density heatmaps and then individual points after zooming in further. To print the map, select the print icon in the lower left. When the "School Districts" layer is turned on, clicking on a school district will zoom the map to the districts extent. Hold the "Shift" key and drag a rectangle over an area to zoom in or use the controls in the lower right.s</p>
+	</div>
+
+
+    <div id="map"></div>
+    <script type="text/javascript">
+    	var map = L.map('map', {
+    		center: [43.56560846230355, -84.70052827162233],
+    		zoom: 8,
+			minZoom: 8,
+			maxZoom: 19,
+			zoomSnap: 0.5,
+			zoomDelta: 0.5,
+			zoomControl: false
+    	});
+
+    	new L.Control.Zoom({position:"bottomright"}).addTo(map);
+
+    	var graytile = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}', {
+			attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+				subdomains: 'abcd',
+				minZoom: 0,
+				maxZoom: 19,
+				ext: 'png'
+			});
+
+		var Esri_WorldStreetMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+			attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012',
+			minZoom: 0,
+			maxZoom: 19
+			}).addTo(map);
+
+		var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+			attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+			minZoom: 0,
+			maxZoom: 19
+			});
+
+    	function onEachFeature (feature, layer) {
+    		if (feature.properties) {
+    			var name = feature.properties.Q_NAME;
+    			var details = feature.properties.DETAILS;
+    			var popup = '<h3>' + name + '</h3>' + '<br><a href="' + details + '" target = "_blank">Click for details</a>'
+    			feature.layer = layer;
+    			layer.bindPopup(popup);
+    		}
+    	};
+
+    	var allheat = new L.esri.Heat.featureLayer({
+    		url: "https://fuzzy.asets.msu.edu/arcgis/rest/services/MISIN/MISIN_browsedata/MapServer/0",
+    		where: "STATE = 'MI'",
+    		minZoom: 10,
+    		maxZoom: 16,
+    		radius: 75
+  		});
+
+  		var allobs = new L.esri.featureLayer({
+				url: "https://fuzzy.asets.msu.edu/arcgis/rest/services/MISIN/MISIN_browsedata/MapServer/0",
+    		where: "STATE = 'MI'",
+    		minZoom: 16.5,
+    		maxZoom: 19,
+			onEachFeature: onEachFeature
+		});
+
+		var plantaeheat = new L.esri.Heat.featureLayer({
+    		url: "https://fuzzy.asets.msu.edu/arcgis/rest/services/MISIN/MISIN_browsedata/MapServer/0",
+    		where: "STATE = 'MI' AND KINGDOM = '0'",
+    		minZoom: 8,
+    		maxZoom: 16,
+    		radius: 40
+  		});
+
+		var plantae = new L.esri.featureLayer({
+				url: "https://fuzzy.asets.msu.edu/arcgis/rest/services/MISIN/MISIN_browsedata/MapServer/0",
+    		where: "STATE = 'MI' AND KINGDOM = '0'",
+    		minZoom: 16.5,
+    		maxZoom: 19,
+				onEachFeature: onEachFeature
+			});
+
+		var animaliaheat = new L.esri.Heat.featureLayer({
+    		url: "https://fuzzy.asets.msu.edu/arcgis/rest/services/MISIN/MISIN_browsedata/MapServer/0",
+    		where: "STATE = 'MI' AND KINGDOM = '1'",
+    		minZoom: 8,
+    		maxZoom: 16,
+    		radius: 40
+  		});
+
+		var animalia = new L.esri.featureLayer({
+			url: "https://fuzzy.asets.msu.edu/arcgis/rest/services/MISIN/MISIN_browsedata/MapServer/0",
+			where: "STATE = 'MI' AND KINGDOM = '1'",
+			minZoom: 16.5,
+			maxZoom: 19,
+			onEachFeature: onEachFeature
+			});
+
+    	var knotheat = new L.esri.Heat.featureLayer({
+    		url: "https://fuzzy.asets.msu.edu/arcgis/rest/services/MISIN/MISIN_browsedata/MapServer/0",
+    		where: "STATE = 'MI' AND Q_NAME LIKE '%knotweed%'",
+    		minZoom: 8,
+    		maxZoom: 16,
+    		radius: 100
+  		});
+
+		var knotweed = new L.esri.featureLayer({
+			url: "https://fuzzy.asets.msu.edu/arcgis/rest/services/MISIN/MISIN_browsedata/MapServer/0",
+			where: "STATE = 'MI' AND Q_NAME LIKE '%knotweed%",
+			minZoom: 16.5,
+			maxZoom: 19,
+			onEachFeature: onEachFeature
+		});
+
+    	var wortheat = new L.esri.Heat.featureLayer({
+    		url: "https://fuzzy.asets.msu.edu/arcgis/rest/services/MISIN/MISIN_browsedata/MapServer/0",
+    		where: "STATE = 'MI' AND Q_NAME LIKE '%swallow-wort%'",
+    		minZoom: 8,
+    		maxZoom: 16,
+    		radius: 100
+  		});
+
+		var swallowwort = new L.esri.featureLayer({
+			url: "https://fuzzy.asets.msu.edu/arcgis/rest/services/MISIN/MISIN_browsedata/MapServer/0",
+			where: "STATE = 'MI' AND Q_NAME LIKE '%swallow-wort%'",
+			minZoom: 16.5,
+			maxZoom: 19,
+			onEachFeature: onEachFeature
+		});
+
+
+    	function schoolFeature (feature, layer) {
+    		if (feature.properties) {
+    			var name = feature.properties.district;
+    			var phone = feature.properties.phone;
+    			var address = feature.properties.address;
+    			var popup = '<h3>' + name + '<br>' + '</h3>' + '<h5>' + "Phone #: " + phone + '<br>' + "Address: " + address + '</h5>' 
+    			feature.layer = layer;
+    			layer.bindPopup(popup);
+    		}
+    	};
+
+		var schooldistricts = new L.geoJSON(schools, {
+			minZoom: 10,
+			maxZoom: 19,
+			onEachFeature: schoolFeature,
+			style: function (feature) {
+				return {
+					fillColor: '#1C00ff00', 
+					weight: 2,
+					color: 'blue'}		
+		}});
+
+		schooldistricts.on("click", function (event) {
+			map.fitBounds(event.layer.getBounds());
+
+		});
+
+		var allgroup = L.layerGroup([allheat, allobs]);
+
+		var plantgroup = L.layerGroup([plantaeheat, plantae]);
+
+		var animalgroup = L.layerGroup([animaliaheat, animalia]);
+
+		var knotgroup = L.layerGroup([knotheat, knotweed]);
+
+		var wortgroup = L.layerGroup([wortheat, swallowwort]);
+
+		var baselayers = {
+			"Gray": graytile,
+			"Street": Esri_WorldStreetMap,
+			"Satellite": Esri_WorldImagery,
+		};
+
+		var overlays = {
+			"All Observations": allgroup,
+			"All Plant Observations": plantgroup,
+			"All Animal Observations": animalgroup,
+			"Knotweed (Japanese/Giant)": knotgroup,
+			"Swallow-wort (Black/Pale)": wortgroup,
+			"School Districts": schooldistricts
+		};
+
+		var controlayeroptions = {
+			collapsed: false,
+			hideSingleBase: true
+		};
+
+		L.control.layers(baselayers, overlays, controlayeroptions).addTo(map);
+
+		L.control.zoomLabel({position: "topleft"}).addTo(map);
+
+		L.easyPrint({
+			title: 'Print Map',
+			position: 'bottomleft',
+			sizeModes: ['A4Portrait', 'A4Landscape'],
+			customWindowTitle: 'Planning Document'
+		}).addTo(map);
+
+    </script>
+
+    <div>
+    	<h4>Please contact Andrew Laws at andrewlawsmapping@gmail.com with any questions or comments.</h4>
+    </div>
+</body>
+</html>

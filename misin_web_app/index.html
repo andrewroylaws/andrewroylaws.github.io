@@ -178,7 +178,7 @@
 
 		var knotweed = new L.esri.featureLayer({
 			url: "https://fuzzy.asets.msu.edu/arcgis/rest/services/MISIN/MISIN_browsedata/MapServer/0",
-			where: "STATE = 'MI' AND Q_NAME LIKE '%knotweed%",
+			where: "STATE = 'MI' AND Q_NAME LIKE '%knotweed%'",
 			minZoom: 16.5,
 			maxZoom: 19,
 			onEachFeature: onEachFeature

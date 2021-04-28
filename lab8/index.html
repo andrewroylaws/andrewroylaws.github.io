@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>Andrew Laws Lab 8</title>
+
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
+
+	<link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/themes/light/main.css"/>
+
+	<script src="https://js.arcgis.com/4.14/"></script> 
+	<style>
+		 html, body, #viewDiv {padding: 0; margin: 0; height: 100%; width: 100%; } 
+
+	</style> 
+
+	<script> 
+		require([
+			"esri/WebScene",
+			"esri/views/SceneView",
+			"esri/layers/FeatureLayer", 
+			"esri/layers/SceneLayer",
+			"esri/tasks/support/Query"], 
+			function(WebScene, SceneView, FeatureLayer, SceneLayer, Query) {
+			 
+			 	var map = new WebScene({ 
+				 	basemap: "satellite", 
+				 	ground: "world-elevation" }); 
+				 
+			 	var view = new SceneView({ 
+				 	container: "viewDiv", 
+				 	map: map, 
+				 	camera: { 
+				 		position: { 
+				 			latitude: 41.6608232, 
+				 			longitude: -91.537668, 
+				 			z: 350 }, 
+			 			tilt: 75, 
+			 			heading: 270 }, 
+		 			environment: { 
+		 				lighting: { 
+		 					date: new Date("June 15, 2019 12:30:00 EDT"), 
+		 					directShadowsEnabled: true, 
+		 					ambientOcclusionEnabled: true } 
+	 				} 
+	 			});
+	 			var uniqueValueInfos = [
+	 				{ 
+	 					value: "Crataegus sp.", 
+ 						symbol: { 
+ 							type: "web-style", 
+							name: "Helianthus", 
+							styleName: "EsriRealisticTreesStyle"
+							 }}, 
+					 { 
+					 	value: "Fraxinus pennsylvanica", 
+					 	symbol: { 
+					 		type: "web-style", 
+					 		name: "Magnolia", 
+					 		styleName: "EsriRealisticTreesStyle" 
+					 		}}, 
+			 		{ 
+			 			value: "Picea abies", 
+		 				symbol: { 
+		 					type: "web-style", 
+		 					name: "Sansevieria", 
+		 					styleName: "EsriRealisticTreesStyle" 
+		 					}}, 
+ 					{
+					 	value: "Gleditsia triacanthos", 
+					 	symbol: { 
+					 		type: "web-style",
+					 		name: "Sabal", 
+					 		styleName: "EsriRealisticTreesStyle" 
+					 		}}, 
+			 		{ 
+		 				value: "Fagus grandifolia", 
+		 				symbol: { 
+		 					type: "web-style",
+		 					name: "Bulbophyllum", 
+		 					styleName: "EsriRealisticTreesStyle" 
+		 					}}, 
+ 					{ 
+ 						value: "Quercus macrocarpa", 
+ 						symbol: { 
+ 							type: "web-style", 
+ 							name: "Pseudotsuga", 
+ 							styleName: "EsriRealisticTreesStyle" 
+ 							}}, 
+					{ 
+						value: "Pinus strobus", 
+						symbol: { 
+							type: "web-style",
+							name: "GenericDead", 
+							styleName: "EsriRealisticTreesStyle" 
+							}}, 
+					{ 
+						value: "Liriodendron tulipifera",
+						symbol: {
+							type: "web-style",
+							name: "Stump",
+							styleName: "EsriRealisticTreesStyle"
+							}}
+				];
+
+	 			var vegetationLayer = new FeatureLayer({
+	 				url: "https://maps.facilities.uiowa.edu/arcgis/rest/services/Features/Trees/MapServer/1",
+	 				elevationInfo: {mode: "on-the-ground"},
+	 				renderer: {
+	 					type: "unique-value",
+	 					field: "Scientific",
+	 					defaultSymbol: {
+	 						type: "web-style",
+	 						name: "Unknown", 
+	 						styleName: "EsriRealisticTreesStyle"
+	 					},
+ 						uniqueValueInfos: uniqueValueInfos,
+ 						visualVariables: [
+	 						{
+	 							type: "size", 
+	 							field: "Height",
+	 							axis: "height"
+	 						},
+	 						{
+	 							type: "rotation",
+	 							valueExpression: "random() * 360"
+	 						}
+	 					]
+	 				}
+	 			});
+
+	 			var bikepaths = new FeatureLayer({
+	 				url: "https://maps.facilities.uiowa.edu/arcgis/rest/services/Features/Bikes/MapServer/5"
+	 			});
+
+	 			map.addMany([vegetationLayer, bikepaths]);
+
+			 	}); 
+
+	 			/*var uniqueValueInfos = [
+	 				{ 
+	 					value: "Crataegus sp.", 
+ 						symbol: { 
+ 							type: "web-style", 
+							name: "Crataegus", 
+							styleName: "EsriRealisticTreesStyle"
+							 }}, 
+					 { 
+					 	value: "Fraxinus pennsylvanica", 
+					 	symbol: { 
+					 		type: "web-style", 
+					 		name: "Fraxinus", 
+					 		styleName: "EsriRealisticTreesStyle" 
+					 		}}, 
+			 		{ 
+			 			value: "Picea abies", 
+		 				symbol: { 
+		 					type: "web-style", 
+		 					name: "Picea", 
+		 					styleName: "EsriRealisticTreesStyle" 
+		 					}}, 
+ 					{
+					 	value: "Gleditsia triacanthos", 
+					 	symbol: { 
+					 		type: "web-style",
+					 		name: "Robinia", 
+					 		styleName: "EsriRealisticTreesStyle" 
+					 		}}, 
+			 		{ 
+		 				value: "Fagus grandifolia", 
+		 				symbol: { 
+		 					type: "web-style",
+		 					name: "Fagus", 
+		 					styleName: "EsriRealisticTreesStyle" 
+		 					}}, 
+ 					{ 
+ 						value: "Quercus macrocarpa", 
+ 						symbol: { 
+ 							type: "web-style", 
+ 							name: "Quercus", 
+ 							styleName: "EsriRealisticTreesStyle" 
+ 							}}, 
+					{ 
+						value: "Pinus strobus", 
+						symbol: { 
+							type: "web-style",
+							name: "Pinus", 
+							styleName: "EsriRealisticTreesStyle" 
+							}}, 
+					{ 
+						value: "Liriodendron tulipifera",
+						symbol: {
+							type: "web-style",
+							name: "Philodendron",
+							styleName: "EsriRealisticTreesStyle"
+							}}
+				];
+
+	 			var vegetationLayer = new FeatureLayer({
+	 				url: "https://maps.facilities.uiowa.edu/arcgis/rest/services/Features/Trees/MapServer/1",
+	 				elevationInfo: {mode: "on-the-ground"},
+	 				renderer: {
+	 					type: "unique-value",
+	 					field: "Scientific",
+	 					defaultSymbol: {
+	 						type: "web-style",
+	 						name: "Unknown", 
+	 						styleName: "EsriRealisticTreesStyle"
+	 					},
+ 						uniqueValueInfos: uniqueValueInfos,
+ 						visualVariables: [
+	 						{
+	 							type: "size", 
+	 							field: "Height",
+	 							axis: "height"
+	 						},
+	 						{
+	 							type: "rotation",
+	 							valueExpression: "random() * 360"
+	 						}
+	 					]
+	 				}
+	 			});
+
+	 			map.add(vegetationLayer);*/
+	</script>
+</head>
+<body>
+	<div id="viewDiv"></div>
+</body>
+</html>

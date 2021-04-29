@@ -124,14 +124,6 @@
     		radius: 50,
 		gradient: {0.45: "blue", 0.80: "lime", 1.0: "red"}
   		});
-
-  		
-	    var planticon = L.icon({
-		    iconUrl: 'https://cdn3.iconfinder.com/data/icons/environment-and-sustainable-simplicon-set/102/plant-growing-512.png',
-		    iconSize: [27, 31],
-		    iconAnchor: [13.5, 17.5],
-		    popupAnchor: [0, -11]
-		  });
 	    
 	    var allobs = new L.esri.featureLayer({
 				url: "https://fuzzy.asets.msu.edu/arcgis/rest/services/MISIN/MISIN_browsedata/MapServer/0",
@@ -150,6 +142,13 @@
 		gradient: {0.45: "blue", 0.80: "lime", 1.0: "red"}
   		});
 
+	    var planticon = L.icon({
+		    iconUrl: 'https://kingcounty.gov/~/media/environment/animalsAndPlants/noxious_weeds/imagesO_R/report-a-weed-icon.ashx?la=en&h=222&w=216&as=1',
+		    iconSize: [27, 31],
+		    iconAnchor: [13.5, 17.5],
+		    popupAnchor: [0, -11]
+		  });
+	    
 		var plantae = new L.esri.featureLayer({
 				url: "https://fuzzy.asets.msu.edu/arcgis/rest/services/MISIN/MISIN_browsedata/MapServer/0",
     		where: "STATE = 'MI' AND KINGDOM = '0'",
